@@ -69,11 +69,15 @@ class PydanticAIBackend(HarnessBackend):
             getattr(getattr(result, "response", None), "model_name", None)
             or _model_id(config.model)
         )
+        raw_usage = result.usage
+        if callable(raw_usage) and not hasattr(raw_usage, "input_tokens"):
+            raw_usage = raw_usage()
+
         return HarnessResult(
             text=text,
             raw=result,
             metadata={"harness": "pydanticai", "model": model_id},
-            usage=_to_usage(result.usage()),
+            usage=_to_usage(raw_usage),
             model=PromptModel(id=model_id),
         )
 
