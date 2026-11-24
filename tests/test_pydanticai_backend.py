@@ -6,6 +6,8 @@ The module is skipped when pydantic-ai is not installed.
 
 from __future__ import annotations
 
+import warnings
+
 import pytest
 
 pytest.importorskip("pydantic_ai")
@@ -144,3 +146,51 @@ async def test_drives_pyflue_through_session(tmp_path, monkeypatch):
     session = await agent.session("s")
     result = await session.prompt("hello")
     assert result.text == "driven by pydantic-ai"
+
+
+@pytest.mark.asyncio
+async def test_backend_executes_wrapped_callable_tool_without_deprecation_warnings(tmp_path):
+    from pyflue.tools import to_callable_tool
+
+    executed: dict = {}
+
+    def execute(args):
+        executed["n"] = args["n"]
+        return args["n"] * 2
+
+    wrapped = to_callable_tool(
+        ToolDef(
+            name="double",
+            description="Double an integer.",
+            parameters={"type": "object", "properties": {"n": {"type": "integer"}}, "required": ["n"]},
+            execute=execute,
+        )
+    )
+
+    turns = {"n": 0}
+
+    def reply(messages, info):
+        turns["n"] += 1
+        if turns["n"] == 1:
+            return ModelResponse(parts=[ToolCallPart(tool_name="double", args={"n": 21})])
+        return ModelResponse(parts=[TextPart("42")])
+
+    config = PyFlueConfig(root=tmp_path)
+    config.model = FunctionModel(reply)
+    with warnings.catch_warnings(record=True) as caught:
+        warnings.simplefilter("always")
+        result = await PydanticAIBackend().run(
+            prompt="double 21",
+            system_prompt="Use tools when needed.",
+            config=config,
+            skills={},
+            sandbox=None,
+            session_id="s",
+            tools=[wrapped],
+        )
+
+    assert executed["n"] == 21
+    assert result.text == "42"
+    assert result.usage.total_tokens >= 0
+    dep_warnings = [w for w in caught if issubclass(w.category, DeprecationWarning)]
+    assert dep_warnings == []

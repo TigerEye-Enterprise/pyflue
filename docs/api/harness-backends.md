@@ -7,7 +7,7 @@ teams can choose the harness runtime that fits their project.
 
 | Backend | Status | Install |
 | --- | --- | --- |
-| `pydanticai` | Implemented, default | included with PyFlue |
+| `pydanticai` | Implemented, default | `pip install 'pyflue[pydanticai]'` |
 | `deepagents` | Implemented, optional | `pip install 'pyflue[deepagents]'` |
 | `openai_agents` | Extension point | `pip install 'pyflue[openai]'` |
 | `google_adk` | Extension point | `pip install 'pyflue[google]'` |
@@ -46,16 +46,17 @@ It is built on LangChain and LangGraph.
 
 ## Pydantic AI Backend
 
-The Pydantic AI backend is the default. It drives PyFlue with the Pydantic AI
-agent loop: typed, model agnostic, and free of LangChain or LangGraph. It is
-included with PyFlue, so it needs no extra install.
+The Pydantic AI backend is the default harness backend. It drives PyFlue with the
+Pydantic AI (`>=2.71,<3`) agent loop: typed, model agnostic, and free of LangChain
+or LangGraph. Install the optional `pydanticai` extra to enable it:
+
+```bash
+pip install 'pyflue[pydanticai]'
+```
 
 ```python
 agent = await init(model="anthropic/claude-sonnet-4-6")  # harness="pydanticai" by default
 ```
-
-The optional `pyflue[pydanticai]` extra adds the Pydantic AI Harness capability
-library; the backend itself works without it.
 
 The backend:
 

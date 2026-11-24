@@ -156,7 +156,7 @@ PyFlue tracks the current supported package lines:
 | default | `deepagents==0.5.6` through `>=0.5.6,<0.6.0` |
 | `openai` | `openai-agents>=0.15.1,<0.16.0` |
 | `google` | `google-adk>=1.32.0,<1.33.0` |
-| `pydanticai` | `pydantic-ai>=1.89.1,<1.90.0` |
+| `pydanticai` | `pydantic-ai>=2.71,<3` |
 | `daytona` | `daytona-sdk>=0.22.0` |
 | `e2b` | `e2b>=2.7.0` |
 | `modal` | `modal>=1.3.0` |
